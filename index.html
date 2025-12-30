@@ -1610,22 +1610,29 @@
 
 <script>
     function switchTab(evt, tabName) {
-        var i, tabcontent, tabbuttons;
-
-        tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].classList.remove("active");
-        }
-
-        tabbuttons = document.getElementsByClassName("tab-button");
-        for (i = 0; i < tabbuttons.length; i++) {
-            tabbuttons[i].classList.remove("active");
-        }
-
-        document.getElementById(tabName).classList.add("active");
+    var i, tabcontent, tabbuttons;
+    
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+        tabcontent[i].classList.remove("active");
+    }
+    
+    tabbuttons = document.getElementsByClassName("tab-button");
+    for (i = 0; i < tabbuttons.length; i++) {
+        tabbuttons[i].classList.remove("active");
+    }
+    
+    var targetElement = document.getElementById(tabName);
+    if (targetElement) {
+        targetElement.style.display = "block";
+        targetElement.classList.add("active");
+    }
+    
+    if (evt && evt.currentTarget) {
         evt.currentTarget.classList.add("active");
     }
-
+}
     function togglePillar(header) {
         const content = header.nextElementSibling;
         const arrow = header.querySelector('.dropdown-arrow');
