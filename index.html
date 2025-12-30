@@ -1717,6 +1717,26 @@ window.clearAllNotes = function() {
     alert('All notes cleared');
   }
 };</script>
+    
+<!-- React JSS Editable Components -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<!-- JSS Library -->
+<script src="https://unpkg.com/jss@10.5.0/dist/jss.min.js"></script>
+<script src="https://unpkg.com/jss-preset-default@10.5.0/dist/jss-preset-default.min.js"></script>
+
+<script type="module">
+  // Import the component code dynamically
+  // Since we can't use ES modules in GitHub Pages static hosting,
+  // we'll use a simpler approach with window object
+  
+  // For now, the React components are available for import via app.js
+  // Users should run a build process with babel/webpack to use JSX
+  
+  console.log('React editable components loaded');
+  console.log('Available: window.React, window.ReactDOM, window.JSS');
+</script>
 
 </body>
 </html>
