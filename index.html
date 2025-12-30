@@ -2144,6 +2144,42 @@ document.getElementById('saveChangesBtn').addEventListener('click', () => {
 document.getElementById('cancelEditsBtn').addEventListener('click', () => {
   exitEditMode();
 });
+
+// Tab Switching Logic
+const tabButtons = document.querySelectorAll('[id^="tab-"]');
+const tabContents = document.querySelectorAll('[id^="content-"]');
+
+tabButtons.forEach(button => {
+  button.addEventListener('click', () => {
+    const tabName = button.getAttribute('data-tab');
+    
+    // Hide all tabs
+    tabContents.forEach(content => {
+      content.style.display = 'none';
+    });
+    
+    // Remove active class from all buttons
+    tabButtons.forEach(btn => {
+      btn.style.borderBottom = 'none';
+      btn.style.color = '#666';
+    });
+    
+    // Show selected tab
+    const selectedContent = document.getElementById('content-' + tabName);
+    if (selectedContent) {
+      selectedContent.style.display = 'block';
+    }
+    
+    // Add active class to clicked button
+    button.style.borderBottom = '3px solid #007bff';
+    button.style.color = '#007bff';
+  });
+});
+
+// Initialize - show first tab
+if (tabButtons.length > 0) {
+  tabButtons[0].click();
+}
 </script>
 
 </body>
