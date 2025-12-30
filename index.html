@@ -1651,7 +1651,72 @@
             btn.textContent = 'View Analysis';
         }
     }
-</script>
+
+// ============ INTERACTIVE NOTE-TAKING WITH LOCALSTORAGE ============
+
+// Initialize notes from localStorage
+function initializeNotes() {
+  const saved Notes = localStorage.getItem('gtciNotes');
+  if (savedNotes) {
+    try {
+      return JSON.parse(savedNotes);
+    } catch (e) {
+      return {};
+    }
+  }
+  return {};
+}
+
+let notes = initializeNotes();
+
+// Add event listeners to all note inputs
+function setupNoteListeners() {
+  const noteTextareas = document.querySelectorAll('textarea[placeholder*="Add"], textarea[placeholder*="Document"], textarea[placeholder*="Track"], textarea[placeholder*="analyze"]');
+  noteTextareas.forEach((textarea, index) => {
+    const noteKey = 'note_' + index;
+    // Load saved note
+    if (notes[noteKey]) {
+      textarea.value = notes[noteKey];
+    }
+    // Save on change
+    textarea.addEventListener('change', function() {
+      notes[noteKey] = this.value;
+      localStorage.setItem('gtciNotes', JSON.stringify(notes));
+      showNotification('Note saved to browser storage');
+    });
+    // Auto-save on input
+    textarea.addEventListener('input', function() {
+      notes[noteKey] = this.value;
+      localStorage.setItem('gtciNotes', JSON.stringify(notes));
+    });
+  });
+}
+
+// Show save notification
+function showNotification(msg) {
+  const notif = document.createElement('div');
+  notif.style.cssText = 'position:fixed;top:20px;right:20px;background:#4caf50;color:white;padding:12px 20px;border-radius:4px;z-index:9999;font-size:14px;';
+  notif.textContent = msg;
+  document.body.appendChild(notif);
+  setTimeout(() => notif.remove(), 2000);
+}
+
+// Initialize notes when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupNoteListeners);
+} else {
+  setupNoteListeners();
+}
+
+// Clear all notes function (optional)
+window.clearAllNotes = function() {
+  if (confirm('Clear all saved notes?')) {
+    localStorage.removeItem('gtciNotes');
+    notes = {};
+    document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+    alert('All notes cleared');
+  }
+};</script>
 
 </body>
 </html>
