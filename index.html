@@ -2006,24 +2006,144 @@ console.log('EditableScorecard component loaded and ready');
 </script>
 
 <!-- Mount React Component -->
-<script type="text/babel">
-// Create a container for the React app
-const container = document.createElement('div');
-container.id = 'react-editable-section';
-container.style.marginTop = '40px';
-container.style.padding = '20px';
-container.style.backgroundColor = '#fafafa';
-container.style.borderRadius = '8px';
 
-// Find the main content area and insert the container
-const mainContent = document.querySelector('.container') || document.body;
-mainContent.appendChild(container);
+<!-- Editable Scorecard Section-->
+<div id="react-editable" style="margin-top: 40px; padding: 20px; background-color: #f5f5f5; border-radius: 8px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #ddd;">
+    <h2 style="font-size: 24px; font-weight: bold; color: #333; margin: 0;">Global Talent Competitiveness Index - Editable</h2>
+    <button id="toggleEditBtn" style="padding: 8px 16px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Edit Scores</button>
+  </div>
+  
+  <div id="scorecardsGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-bottom: 20px;">
+    <div class="scorecard-item" data-field="overallRank" style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">
+      <div style="font-size: 14px; font-weight: 600; color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Overall Rank</div>
+      <div class="display-value" style="font-size: 32px; font-weight: bold; color: #007bff; margin-bottom: 10px;">44</div>
+    </div>
+    
+    <div class="scorecard-item" data-field="globalTCI" style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">
+      <div style="font-size: 14px; font-weight: 600; color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Global TCI Score</div>
+      <div class="display-value" style="font-size: 32px; font-weight: bold; color: #007bff; margin-bottom: 10px;">63.2</div>
+    </div>
+    
+    <div class="scorecard-item" data-field="enablers" style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">
+      <div style="font-size: 14px; font-weight: 600; color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Enablers Score</div>
+      <div class="display-value" style="font-size: 32px; font-weight: bold; color: #007bff; margin-bottom: 10px;">62.5</div>
+    </div>
+    
+    <div class="scorecard-item" data-field="practitioners" style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">
+      <div style="font-size: 14px; font-weight: 600; color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Practitioners Score</div>
+      <div class="display-value" style="font-size: 32px; font-weight: bold; color: #007bff; margin-bottom: 10px;">65.0</div>
+    </div>
+    
+    <div class="scorecard-item" data-field="results" style="background-color: white; padding: 15px; border-radius: 6px; border: 1px solid #ddd;">
+      <div style="font-size: 14px; font-weight: 600; color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Results Score</div>
+      <div class="display-value" style="font-size: 32px; font-weight: bold; color: #007bff; margin-bottom: 10px;">62.1</div>
+    </div>
+  </div>
+  
+  <div id="saveButtons" style="display: none; margin-top: 20px;">
+    <button id="saveChangesBtn" style="padding: 8px 16px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; margin-right: 10px;">Save All Changes</button>
+    <button id="cancelEditsBtn" style="padding: 8px 16px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Cancel</button>
+  </div>
+</div>
 
-// Render the React component
-const root = ReactDOM.createRoot(container);
-root.render(<window.EditableScorecard React.createElement(window.EditableScorecard);
+<script>
+// Editable Scorecard Logic
+let editMode = false;
+let scoreData = {
+  overallRank: 44,
+  globalTCI: 63.2,
+  enablers: 62.5,
+  practitioners: 65.0,
+  results: 62.1
+};
 
-console.log('React EditableScorecard mounted successfully');
+// Load from localStorage
+const saved = localStorage.getItem('scorecard_data');
+if (saved) {
+  scoreData = JSON.parse(saved);
+  updateDisplay();
+}
+
+function updateDisplay() {
+  document.querySelectorAll('.scorecard-item').forEach(item => {
+    const field = item.getAttribute('data-field');
+    const displayValue = item.querySelector('.display-value');
+    displayValue.textContent = scoreData[field];
+  });
+}
+
+function enterEditMode() {
+  editMode = true;
+  document.getElementById('toggleEditBtn').textContent = 'Cancel Edit';
+  document.getElementById('saveButtons').style.display = 'block';
+  
+  document.querySelectorAll('.scorecard-item').forEach(item => {
+    const field = item.getAttribute('data-field');
+    const displayValue = item.querySelector('.display-value');
+    item.style.backgroundColor = '#fff3cd';
+    item.style.borderColor = '#ffc107';
+    
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.step = field === 'overallRank' ? '1' : '0.1';
+    input.value = scoreData[field];
+    input.style.width = '100%';
+    input.style.padding = '8px';
+    input.style.marginBottom = '10px';
+    input.style.border = '2px solid #007bff';
+    input.style.borderRadius = '4px';
+    input.className = 'edit-input';
+    input.setAttribute('data-field', field);
+    
+    displayValue.replaceWith(input);
+  });
+}
+
+function exitEditMode() {
+  editMode = false;
+  document.getElementById('toggleEditBtn').textContent = 'Edit Scores';
+  document.getElementById('saveButtons').style.display = 'none';
+  
+  document.querySelectorAll('.scorecard-item').forEach(item => {
+    item.style.backgroundColor = 'white';
+    item.style.borderColor = '#ddd';
+    
+    const input = item.querySelector('.edit-input');
+    if (input) {
+      const field = input.getAttribute('data-field');
+      const displayValue = document.createElement('div');
+      displayValue.className = 'display-value';
+      displayValue.style.cssText = 'font-size: 32px; font-weight: bold; color: #007bff; margin-bottom: 10px;';
+      displayValue.textContent = scoreData[field];
+      input.replaceWith(displayValue);
+    }
+  });
+}
+
+document.getElementById('toggleEditBtn').addEventListener('click', () => {
+  if (!editMode) {
+    enterEditMode();
+  } else {
+    exitEditMode();
+  }
+});
+
+document.getElementById('saveChangesBtn').addEventListener('click', () => {
+  document.querySelectorAll('.edit-input').forEach(input => {
+    const field = input.getAttribute('data-field');
+    scoreData[field] = input.value;
+  });
+  
+  localStorage.setItem('scorecard_data', JSON.stringify(scoreData));
+  updateDisplay();
+  exitEditMode();
+  alert('Scorecard updated successfully!');
+});
+
+document.getElementById('cancelEditsBtn').addEventListener('click', () => {
+  exitEditMode();
+});
 </script>
 
 </body>
