@@ -2010,50 +2010,10 @@ function EditableScorecard() {
 window.EditableScorecard = EditableScorecard;
 console.log('EditableScorecard component loaded and ready');
 
-    // FIXED: Enhanced switchTab function for working tabs
-window.addEventListener('DOMContentLoaded', function() {
-  // Ensure switchTab works on all tab buttons
-  const tabButtons = document.querySelectorAll('.tab-button');
-  tabButtons.forEach(button => {
-    button.addEventListener('click', function(e) {
-      const tabNameMatch = this.getAttribute('onclick').match(/'([^']+)'/)[1];
-      if (tabNameMatch) {
-        switchTab(e, tabNameMatch);
-      }
     });
   });
 });
 
-// Override switchTab with more robust version
-const originalSwitchTab = window.switchTab;
-window.switchTab = function(evt, tabName) {
-  try {
-    // Hide all tab content
-    const tabs = document.getElementsByClassName('tab-content');
-    for (let i = 0; i < tabs.length; i++) {
-      tabs[i].classList.remove('active');
-      tabs[i].style.display = 'none';
-    }
-    // Remove active from all buttons  
-    const buttons = document.getElementsByClassName('tab-button');
-    for (let i = 0; i < buttons.length; i++) {
-      buttons[i].classList.remove('active');
-    }
-    // Show selected tab
-    const selectedTab = document.getElementById(tabName);
-    if (selectedTab) {
-      selectedTab.classList.add('active');
-      selectedTab.style.display = 'block';
-    }
-    // Mark button as active
-    if (evt && evt.currentTarget) {
-      evt.currentTarget.classList.add('active');
-    }
-    console.log('Tab switched to:', tabName);
-  } catch(err) {
-    console.error('Tab switch error:', err);
-  }
-};
 </script>
 
 <!-- Mount React Component -->
