@@ -2180,6 +2180,73 @@ tabButtons.forEach(button => {
 if (tabButtons.length > 0) {
   tabButtons[0].click();
 }
+
+
+// PENCIL EDIT ICONS WITH MODAL POPUPS
+const editModalCSS = `
+.edit-icon { cursor: pointer; color: #007bff; font-size: 16px; padding: 5px; hover: color #0056b3; }
+.modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
+.modal-content { background: white; margin: 10% auto; padding: 30px; width: 80%; max-width: 600px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+.modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 2px solid #007bff; padding-bottom: 10px; }
+.close-modal { font-size: 24px; cursor: pointer; color: #aaa; }
+.edit-textarea { width: 100%; height: 250px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: Arial; font-size: 13px; margin-bottom: 15px; }
+.modal-buttons { display: flex; gap: 10px; justify-content: flex-end; }
+.save-btn { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+.cancel-btn { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+.save-btn:hover { background: #218838; }
+.cancel-btn:hover { background: #5a6268; }
+`;
+
+const style = document.createElement('style');
+style.textContent = editModalCSS;
+document.head.appendChild(style);
+
+function createEditModal(sectionId, title) {
+  const modal = document.getElementById('modal-' + sectionId);
+  if (modal) return;
+  
+  const newModal = document.createElement('div');
+  newModal.id = 'modal-' + sectionId;
+  newModal.className = 'modal';
+  
+  const saved = localStorage.getItem('edit_' + sectionId) || '';
+  
+  newModal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 style="margin:0;">✏️ ${title}</h2>
+        <span class="close-modal" onclick="document.getElementById('modal-${sectionId}').style.display='none';">×</span>
+      </div>
+      <textarea class="edit-textarea" id="text-${sectionId}" placeholder="Enter your content here...">${saved}</textarea>
+      <div class="modal-buttons">
+        <button class="cancel-btn" onclick="document.getElementById('modal-${sectionId}').style.display='none';">Cancel</button>
+        <button class="save-btn" onclick="saveEdit('${sectionId}', '${title}')">Save Changes</button>
+      </div>
+    </div>
+  `;
+  
+  newModal.onclick = (e) => { if (e.target === newModal) newModal.style.display = 'none'; };
+  document.body.appendChild(newModal);
+}
+
+function openEditModal(sectionId, title) {
+  let modal = document.getElementById('modal-' + sectionId);
+  if (!modal) createEditModal(sectionId, title);
+  modal = document.getElementById('modal-' + sectionId);
+  modal.style.display = 'block';
+  document.getElementById('text-' + sectionId).focus();
+}
+
+function saveEdit(sectionId, title) {
+  const content = document.getElementById('text-' + sectionId).value;
+  localStorage.setItem('edit_' + sectionId, content);
+  document.getElementById('modal-' + sectionId).style.display = 'none';
+  alert('✅ ' + title + ' saved!');
+}
+
+window.openEditModal = openEditModal;
+window.saveEdit = saveEdit;
+console.log('✅ Pencil edit system loaded!');
 </script>
 
 </body>
