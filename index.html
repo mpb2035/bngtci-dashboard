@@ -1718,24 +1718,312 @@ window.clearAllNotes = function() {
   }
 };</script>
     
-<!-- React JSS Editable Components -->
+
+<!-- React & JSS Libraries -->
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-<!-- JSS Library -->
 <script src="https://unpkg.com/jss@10.5.0/dist/jss.min.js"></script>
 <script src="https://unpkg.com/jss-preset-default@10.5.0/dist/jss-preset-default.min.js"></script>
 
-<script type="module">
-  // Import the component code dynamically
-  // Since we can't use ES modules in GitHub Pages static hosting,
-  // we'll use a simpler approach with window object
-  
-  // For now, the React components are available for import via app.js
-  // Users should run a build process with babel/webpack to use JSX
-  
-  console.log('React editable components loaded');
-  console.log('Available: window.React, window.ReactDOM, window.JSS');
+<!-- Babel Standalone for JSX Support -->
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- EditableScorecard Component -->
+<script type="text/babel">
+const jss = window.JSS.default;
+const preset = window.JSSPreset.default;
+const jssPreset = jss.use(preset());
+
+const { useState, useEffect } = React;
+
+const styles = {
+  scorecard: {
+    padding: '20px',
+    backgroundColor: '#f5f5f5',
+    borderRadius: '8px',
+    marginBottom: '20px',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '20px',
+    paddingBottom: '15px',
+    borderBottom: '2px solid #ddd'
+  },
+  title: {
+    fontSize: '24px',
+    fontWeight: 'bold',
+    color: '#333'
+  },
+  toggleButton: {
+    padding: '8px 16px',
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '14px'
+  },
+  indicatorGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '15px',
+    marginBottom: '20px'
+  },
+  indicatorCard: {
+    backgroundColor: 'white',
+    padding: '15px',
+    borderRadius: '6px',
+    border: '1px solid #ddd',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.05)'
+  },
+  indicatorLabel: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#555',
+    marginBottom: '8px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+  scoreDisplay: {
+    fontSize: '32px',
+    fontWeight: 'bold',
+    color: '#007bff',
+    marginBottom: '10px'
+  },
+  editableField: {
+    width: '100%',
+    padding: '8px',
+    fontSize: '18px',
+    border: '2px solid #007bff',
+    borderRadius: '4px',
+    fontWeight: 'bold',
+    color: '#007bff',
+    marginBottom: '10px'
+  },
+  rankField: {
+    width: '100%',
+    padding: '6px',
+    fontSize: '14px',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    marginBottom: '10px'
+  },
+  buttonGroup: {
+    display: 'flex',
+    gap: '8px',
+    marginTop: '10px'
+  },
+  saveButton: {
+    padding: '6px 12px',
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '12px'
+  },
+  cancelButton: {
+    padding: '6px 12px',
+    backgroundColor: '#6c757d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '12px'
+  },
+  editMode: {
+    backgroundColor: '#fff3cd',
+    borderColor: '#ffc107'
+  }
+};
+
+const sheet = jss.createStyleSheet(styles);
+sheet.attach();
+
+function EditableScorecard() {
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [scoreData, setScoreData] = useState({
+    overallRank: 44,
+    globalTCI: 63.2,
+    enablers: 62.5,
+    practitioners: 65.0,
+    results: 62.1
+  });
+  const [editValues, setEditValues] = useState(scoreData);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('scorecard_data');
+    if (saved) {
+      const parsedData = JSON.parse(saved);
+      setScoreData(parsedData);
+      setEditValues(parsedData);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('scorecard_data', JSON.stringify(scoreData));
+  }, [scoreData]);
+
+  const handleEditChange = (field, value) => {
+    setEditValues(prev => ({
+      ...prev,
+      [field]: isNaN(value) ? value : parseFloat(value)
+    }));
+  };
+
+  const handleSave = () => {
+    setScoreData(editValues);
+    setIsEditMode(false);
+    if (window.notifyChange) {
+      window.notifyChange('Scorecard updated successfully!');
+    }
+  };
+
+  const handleCancel = () => {
+    setEditValues(scoreData);
+    setIsEditMode(false);
+  };
+
+  const handleToggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+    setEditValues(scoreData);
+  };
+
+  return (
+    <div style={styles.scorecard}>
+      <div style={styles.header}>
+        <h2 style={styles.title}>Global Talent Competitiveness Index - Editable</h2>
+        <button 
+          style={styles.toggleButton}
+          onClick={handleToggleEditMode}
+        >
+          {isEditMode ? 'Cancel Edit' : 'Edit Scores'}
+        </button>
+      </div>
+
+      <div style={styles.indicatorGrid}>
+        <div style={{...styles.indicatorCard, ...(isEditMode ? styles.editMode : {})}}>
+          <div style={styles.indicatorLabel}>Overall Rank</div>
+          {isEditMode ? (
+            <>
+              <input
+                type="number"
+                style={styles.rankField}
+                value={editValues.overallRank}
+                onChange={(e) => handleEditChange('overallRank', e.target.value)}
+                placeholder="Enter rank"
+              />
+            </>
+          ) : (
+            <div style={styles.scoreDisplay}>{scoreData.overallRank}</div>
+          )}
+        </div>
+
+        <div style={{...styles.indicatorCard, ...(isEditMode ? styles.editMode : {})}}>
+          <div style={styles.indicatorLabel}>Global TCI Score</div>
+          {isEditMode ? (
+            <input
+              type="number"
+              step="0.1"
+              style={styles.editableField}
+              value={editValues.globalTCI}
+              onChange={(e) => handleEditChange('globalTCI', e.target.value)}
+              placeholder="Enter score"
+            />
+          ) : (
+            <div style={styles.scoreDisplay}>{scoreData.globalTCI}</div>
+          )}
+        </div>
+
+        <div style={{...styles.indicatorCard, ...(isEditMode ? styles.editMode : {})}}>
+          <div style={styles.indicatorLabel}>Enablers Score</div>
+          {isEditMode ? (
+            <input
+              type="number"
+              step="0.1"
+              style={styles.editableField}
+              value={editValues.enablers}
+              onChange={(e) => handleEditChange('enablers', e.target.value)}
+              placeholder="Enter score"
+            />
+          ) : (
+            <div style={styles.scoreDisplay}>{scoreData.enablers}</div>
+          )}
+        </div>
+
+        <div style={{...styles.indicatorCard, ...(isEditMode ? styles.editMode : {})}}>
+          <div style={styles.indicatorLabel}>Practitioners Score</div>
+          {isEditMode ? (
+            <input
+              type="number"
+              step="0.1"
+              style={styles.editableField}
+              value={editValues.practitioners}
+              onChange={(e) => handleEditChange('practitioners', e.target.value)}
+              placeholder="Enter score"
+            />
+          ) : (
+            <div style={styles.scoreDisplay}>{scoreData.practitioners}</div>
+          )}
+        </div>
+
+        <div style={{...styles.indicatorCard, ...(isEditMode ? styles.editMode : {})}}>
+          <div style={styles.indicatorLabel}>Results Score</div>
+          {isEditMode ? (
+            <input
+              type="number"
+              step="0.1"
+              style={styles.editableField}
+              value={editValues.results}
+              onChange={(e) => handleEditChange('results', e.target.value)}
+              placeholder="Enter score"
+            />
+          ) : (
+            <div style={styles.scoreDisplay}>{scoreData.results}</div>
+          )}
+        </div>
+      </div>
+
+      {isEditMode && (
+        <div style={styles.header}>
+          <button style={styles.saveButton} onClick={handleSave}>Save All Changes</button>
+          <button style={styles.cancelButton} onClick={handleCancel}>Cancel</button>
+          <p style={{fontSize: '12px', color: '#666', margin: 0}}>
+            💾 Data auto-saves to browser storage
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Render the component after the main content
+window.EditableScorecard = EditableScorecard;
+console.log('EditableScorecard component loaded and ready');
+</script>
+
+<!-- Mount React Component -->
+<script type="text/babel">
+// Create a container for the React app
+const container = document.createElement('div');
+container.id = 'react-editable-section';
+container.style.marginTop = '40px';
+container.style.padding = '20px';
+container.style.backgroundColor = '#fafafa';
+container.style.borderRadius = '8px';
+
+// Find the main content area and insert the container
+const mainContent = document.querySelector('.container') || document.body;
+mainContent.appendChild(container);
+
+// Render the React component
+const root = ReactDOM.createRoot(container);
+root.render(<window.EditableScorecard />);
+
+console.log('React EditableScorecard mounted successfully');
 </script>
 
 </body>
